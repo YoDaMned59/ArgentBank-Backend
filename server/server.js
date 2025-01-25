@@ -4,15 +4,23 @@ const cors = require('cors')
 const swaggerUi = require('swagger-ui-express')
 const yaml = require('yamljs')
 const swaggerDocs = yaml.load('./swagger.yaml')
-const dbConnection = require('./database/connection')
+const mongoose = require('mongoose')
 
 dotEnv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3001
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/argentbank'
 
 // Connect to the database
-dbConnection()
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Database successfully connected')
+}).catch((error) => {
+  console.error('Database connectivity error:', error)
+})
 
 // Handle CORS issues
 app.use(cors())
