@@ -14,7 +14,7 @@ paths:
       tags:
         - User Module
       summary: Login
-      description: API for Login
+      description: API for user login
       parameters:
         - in: body
           name: body
@@ -33,12 +33,13 @@ paths:
           description: Invalid Fields
         '500':
           description: Internal Server Error
+
   /user/signup:
     post:
       tags:
         - User Module
       summary: Signup
-      description: API for Signup
+      description: API for user signup
       parameters:
         - in: body
           name: body
@@ -57,23 +58,22 @@ paths:
           description: Invalid Fields
         '500':
           description: Internal Server Error
+
   /user/profile:
     get:
       security:
         - Bearer: []
       tags:
         - User Module
-      summary: User Profile API
-      description: API for fetching a user profile
-      #produces:
-       # - application/json
+      summary: Get User Profile
+      description: Retrieve the profile of the logged-in user
       responses:
         '200':
-          description: User profile retrieved successully
+          description: User profile retrieved successfully
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '400':
-          description: Invalid Fields
+            $ref: '#/definitions/UserProfileResponse'
+        '401':
+          description: Unauthorized. Token is invalid or missing.
         '500':
           description: Internal Server Error
     put:
@@ -81,57 +81,135 @@ paths:
         - Bearer: []
       tags:
         - User Module
-      summary: User Profile API
-      description: API for updating a user profile
+      summary: Update User Profile
+      description: Update the profile of the logged-in user
       parameters:
         - in: body
           name: body
-          description: Update user profile attributes
+          description: Updated user profile data
           required: true
           schema:
             $ref: '#/definitions/UserProfile'
-      produces:
-        - application/json
       responses:
         '200':
-          description: User profile retrieved successully
+          description: User profile updated successfully
           schema:
             $ref: '#/definitions/ApiResponse'
         '400':
           description: Invalid Fields
         '500':
           description: Internal Server Error
+
+  /transactions:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transaction Module
+      summary: Get All Transactions
+      description: Retrieve all transactions for the logged-in user
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Transaction'
+        '401':
+          description: Unauthorized. Token is invalid or missing.
+        '500':
+          description: Internal Server Error
+
+  /transactions/details:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transaction Module
+      summary: Get Transaction Details
+      description: Retrieve details of all transactions for the logged-in user
+      responses:
+        '200':
+          description: Transaction details retrieved successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TransactionDetail'
+        '401':
+          description: Unauthorized. Token is invalid or missing.
+        '500':
+          description: Internal Server Error
+
+  /transaction/{id}:
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - Transaction Module
+      summary: Update a Transaction
+      description: Update details of a specific transaction
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: ID of the transaction to update
+        - in: body
+          name: body
+          description: Transaction details to update
+          required: true
+          schema:
+            $ref: '#/definitions/TransactionUpdate'
+      responses:
+        '200':
+          description: Transaction updated successfully
+          schema:
+            $ref: '#/definitions/ApiResponse'
+        '401':
+          description: Unauthorized. Token is invalid or missing.
+        '404':
+          description: Transaction not found.
+        '500':
+          description: Internal Server Error
+
 securityDefinitions:
   Bearer:
     type: apiKey
     name: Authorization
     in: header
+
 definitions:
   User:
+    type: object
     properties:
       email:
         type: string
-        description: user email
+        description: User email
       password:
         type: string
-        description: user password
+        description: User password
       firstName:
         type: string
-        description: user first name
+        description: User first name
       lastName:
         type: string
-        description: user last name
+        description: User last name
       userName:
         type: string
-        description: user public name
+        description: User public name
+
   Login:
+    type: object
     properties:
       email:
         type: string
-        description: user email
+        description: User email
       password:
         type: string
-        description: user password
+        description: User password
+
   ApiResponse:
     type: object
     properties:
@@ -146,13 +224,78 @@ definitions:
             type: string
           email:
             type: string
+
   LoginResponse:
     type: object
     properties:
       token:
         type: string
+
   UserProfile:
     type: object
     properties:
       userName:
+        type: string
+
+  UserProfileResponse:
+    type: object
+    properties:
+      status:
+        type: integer
+      message:
+        type: string
+      body:
+        type: object
+        properties:
+          id:
+            type: string
+          email:
+            type: string
+          userName:
+            type: string
+
+  Transaction:
+    type: object
+    properties:
+      id:
+        type: string
+      date:
+        type: string
+        format: date
+      description:
+        type: string
+      amount:
+        type: number
+      balance:
+        type: number
+      category:
+        type: string
+      note:
+        type: string
+
+  TransactionDetail:
+    type: object
+    properties:
+      id:
+        type: string
+      date:
+        type: string
+        format: date
+      description:
+        type: string
+      amount:
+        type: number
+      balance:
+        type: number
+      category:
+        type: string
+      note:
+        type: string
+
+  TransactionUpdate:
+    type: object
+    properties:
+      category:
+        type: string
+      note:
         type: string
